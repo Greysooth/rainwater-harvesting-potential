@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaSave - Rainwater Harvesting Potential</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <img src="sih_banner.png" alt="Smart India Hackathon Banner" class="logo-banner">
+            </div>
+            <div class="nav-links">
+                <a href="#calculator">Calculator</a>
+                <a href="#info">Benefits</a>
+                <a href="#how-it-works">How It Works</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="calculator">
+            <div class="hero-content container">
+                <div class="input-panel">
+                    <h2>Calculate Your Home's Potential</h2>
+                    <p>Unlock the power of rain. See how much water your rooftop can save in just a few clicks.</p>
+                    <form id="harvest-form">
+                        <div class="form-group">
+                            <input type="text" id="location" required>
+                            <label for="location">Your Location (e.g., Bhubaneswar)</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="roof-area" required>
+                            <label for="roof-area">Rooftop Area (sq. meters)</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="dwellers" required>
+                            <label for="dwellers">Number of Dwellers</label>
+                        </div>
+                        <button type="submit" class="cta-button"><span>Calculate Now</span> <i class="fas fa-arrow-right"></i></button>
+                    </form>
+                </div>
+                <div class="dashboard" id="dashboard">
+                    <h2>Your Results</h2>
+                    <div class="dashboard-grid">
+                        <div class="card feasibility-card">
+                            <h3>Feasibility</h3>
+                            <div class="feasibility-gauge"><div class="gauge-body"><div class="gauge-fill"></div><div class="gauge-cover"><span id="feasibility-text"></span></div></div></div>
+                        </div>
+                        <div class="card liters-card">
+                            <i class="fas fa-water"></i>
+                            <h3>Annual Water Recharged</h3>
+                            <p class="metric"><span id="liters-recharged">0</span> L</p>
+                        </div>
+                        <div class="card rtrwh-type-card">
+                            <i id="rtrwh-type-icon" class="fas fa-tools"></i>
+                            <h3>Recommended System</h3>
+                            <p class="metric-small" id="rtrwh-type-text">-</p>
+                            <small id="rtrwh-type-description"></small>
+                        </div>
+                        <div class="card savings-card">
+                        <i class="fas fa-piggy-bank"></i>
+                            <h3>Water Savings</h3>
+                            <p class="metric"><span id="demand-met-percent">0</span>%</p>
+                        <small id="demand-met-text">of your annual water demand can be met.</small>
+                        </div>
+                        <div class="card subsidy-card">
+                             <i class="fas fa-hand-holding-dollar"></i>
+                            <h3>Subsidy Info</h3>
+                            <p class="metric" id="subsidy-info">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="info" class="info-section container hidden">
+            <h2>Why Harvest Rainwater?</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-seedling"></i>
+                    <h3>Sustain Resources</h3>
+                    <p>Reduces strain on groundwater and municipal supplies, ensuring water availability for the future.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-wallet"></i>
+                    <h3>Lower Water Bills</h3>
+                    <p>Using harvested water for non-potable needs like gardening can significantly cut your monthly expenses.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-house-flood-water"></i>
+                    <h3>Prevent Flooding</h3>
+                    <p>By capturing runoff, you help reduce soil erosion and the burden on storm drains during heavy rains.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="how-it-works" class="info-section container hidden">
+            <h2>As Easy As 1-2-3</h2>
+             <div class="steps-grid">
+                <div class="step-card"><span>1</span><h3>Capture</h3><p>Rain falls on your roof and is directed through pipes.</p></div>
+                <div class="arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                <div class="step-card"><span>2</span><h3>Filter</h3><p>A simple filtration system removes debris and contaminants.</p></div>
+                <div class="arrow"><i class="fas fa-long-arrow-alt-right"></i></div>
+                <div class="step-card"><span>3</span><h3>Recharge</h3><p>The clean water is stored or used to replenish groundwater.</p></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="chatbot-toggler"><i class="fas fa-comment-dots"></i></div>
+    <div class="chatbot-window">
+        <div class="chatbot-header"><h3>AquaBot</h3><span class="close-btn">&times;</span></div>
+        <div class="chatbot-body"><div class="chat-message bot"><p>Hello! How can I help you?</p></div></div>
+        <div class="chatbot-input"><input type="text" placeholder="Ask a question..."><button><i class="fas fa-paper-plane"></i></button></div>
+    </div>
+    
+    <footer>
+         <div class="footer-logo-container">
+            <img src="sih_logo.png" alt="Smart India Hackathon Logo" class="sih-logo">
+        </div>
+        <p>&copy; 2025 AquaSave Initiative. Built for SIH.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+[
+  {
+    "city": "Bhubaneswar",
+    "state": "Odisha",
+    "soil_type": "Alluvial, Lateritic, and Red Loamy Soils",
+    "avg_rainfall_mm": 1408,
+    "aquifer_type": "Porous (Alluvium) & Fissured (Hard Rock)",
+    "avg_depth_to_water_table_meters": 5,
+    "recharge_efficiency_percent": 70,
+    "subsidy_details": {
+      "available": true,
+      "summary": "Up to ₹55,000 or 50% of cost.",
+      "details": "Eligible for private residences with 50-200 sq.m roofs, under 3 floors. Scheme valid 2022-2027."
+    }
+  },
+  {
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "soil_type": "Sandy, Loam, and Black Soil",
+    "avg_rainfall_mm": 853,
+    "aquifer_type": "Fissured (Hard Rock - Weathered & Fractured Gneiss)",
+    "avg_depth_to_water_table_meters": 6.4,
+    "recharge_efficiency_percent": 45,
+    "subsidy_details": {
+      "available": true,
+      "summary": "Up to 40% of installation cost.",
+      "details": "Primarily focused on farmers, but urban residents can receive incentives through BWSSB regulations."
+    }
+  },
+  {
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "soil_type": "Alluvium, Desertic Seriozem Soil, Lithosols",
+    "avg_rainfall_mm": 600,
+    "aquifer_type": "Older Alluvium (Weathered & Fractured Zones)",
+    "avg_depth_to_water_table_meters": 40,
+    "recharge_efficiency_percent": 35,
+    "subsidy_details": {
+      "available": true,
+      "summary": "₹22,000 to ₹26,500 assistance.",
+      "details": "Available for urban properties with a roof area between 200 and 500 sq. meters."
+    }
+  }
+]

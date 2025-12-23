@@ -1,0 +1,24 @@
+{
+  "name": "sih-prototype",
+  "version": "1.0.0",
+  "description": "Backend server for the AquaSave SIH prototype.",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "sih",
+    "rainwater-harvesting",
+    "chatbot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0",
+    "node-fetch": "^3.3.2",
+    "openai": "^5.21.0"
+  }
+}
