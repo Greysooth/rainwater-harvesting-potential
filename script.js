@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://rainwater-harvesting-potential.onrender.com/";
+const API_BASE_URL = "https://rainwater-harvesting-potential.onrender.com";
 document.addEventListener("DOMContentLoaded", () => {
 
   let dashboardContext = null;
