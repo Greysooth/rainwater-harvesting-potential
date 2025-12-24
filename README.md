@@ -27,7 +27,7 @@ The project focuses on promoting **sustainable water management** through simple
 ## 🏗️ Project Structure
 ```
 ├── src/              # Backend server & seeder
-├── public/           # Frontend source (for GitHub Pages)
+├                     # Frontend source (for GitHub Pages)
 ├── data/             # Fallback datasets
 ├── docs/             # SIH problem statement
 ├── screenshots/      # Demo images
