@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import fs from "fs/promises";
 import { MongoClient } from "mongodb";
 import cors from "cors";
+import OpenAI from "openai";
 
 
 dotenv.config();
@@ -144,19 +145,72 @@ app.post("/api/calculate", async (req, res) => {
 });
 
 // --------------------------------------------------
-// API: Chatbot (placeholder, frontend-safe)
+// API: Chatbot 
 // --------------------------------------------------
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
 app.post("/api/chat", async (req, res) => {
-  if (!process.env.OPENAI_API_KEY) {
-    return res.json({
-      reply: "Chatbot integration placeholder"
+  try {
+    const { message, context } = req.body;
+
+    // Guard: missing API key
+    if (!process.env.OPENAI_API_KEY) {
+      return res.json({
+        reply:
+          "AI assistant is currently unavailable. Please configure the API key."
+      });
+    }
+
+    // Guard: no calculation context yet
+    if (!context) {
+      return res.json({
+        reply:
+          "Please calculate your rainwater harvesting potential first, then ask questions."
+      });
+    }
+
+    const systemPrompt = `
+You are a helpful assistant for a rainwater harvesting assessment tool.
+
+You MUST answer strictly using the following context.
+Do NOT invent numbers or policies.
+If a question is unrelated, politely refuse.
+
+Context:
+- Annual harvestable water: ${context.water} litres
+- Feasibility: ${context.feasibility}
+- Percent demand met: ${context.percentDemandMet}%
+- Annual household demand: ${context.annualDemand} litres
+- Recommended system: ${context.recommendedStructure.name}
+- Subsidy info: ${context.subsidyInfo}
+
+Explain clearly, in simple language, suitable for a general user.
+`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
+      ],
+      temperature: 0.4,
+      max_tokens: 150
+    });
+
+    res.json({
+      reply: completion.choices[0].message.content
+    });
+
+  } catch (error) {
+    console.error("Chatbot error:", error);
+    res.json({
+      reply:
+        "Sorry, I ran into an issue while answering. Please try again later."
     });
   }
-
-  // Future OpenAI logic goes here
-  return res.json({
-    reply: "Chatbot integration placeholder"
-  });
 });
 
 // --------------------------------------------------
