@@ -1,127 +1,265 @@
-// -----------------------------
-// Config
-// -----------------------------
-// Set this to your Render backend URL when deployed
-// Example: https://your-backend.onrender.com
-const API_BASE_URL = ""; // empty = same-origin (local dev)
+const API_BASE_URL = "https://rainwater-harvesting-potential.onrender.com/";
+document.addEventListener("DOMContentLoaded", () => {
 
-// -----------------------------
-// DOM Elements
-// -----------------------------
-const form = document.getElementById("calc-form");
-const resultBox = document.getElementById("result");
-const errorBox = document.getElementById("error");
-const locationInput = document.getElementById("location");
-const roofAreaInput = document.getElementById("roofArea");
-const dwellersInput = document.getElementById("dwellers");
+  let dashboardContext = null;
 
-// Autocomplete container
-let autocompleteBox = document.createElement("div");
-autocompleteBox.className = "autocomplete-box";
-locationInput.parentNode.appendChild(autocompleteBox);
+  // --------------------------------------------------
+  // DOM SELECTIONS
+  // --------------------------------------------------
+  const harvestForm = document.getElementById("harvest-form");
+  const dashboard = document.getElementById("dashboard");
 
-let locationsCache = [];
+  const feasibilityText = document.getElementById("feasibility-text");
+  const litersRechargedText = document.getElementById("liters-recharged");
+  const subsidyInfoText = document.getElementById("subsidy-info");
 
-// -----------------------------
-// Helpers
-// -----------------------------
-function showError(message) {
-  errorBox.textContent = message;
-  errorBox.style.display = "block";
-}
+  const rtrwhTypeIcon = document.getElementById("rtrwh-type-icon");
+  const rtrwhTypeText = document.getElementById("rtrwh-type-text");
+  const rtrwhTypeDescription = document.getElementById("rtrwh-type-description");
 
-function clearError() {
-  errorBox.textContent = "";
-  errorBox.style.display = "none";
-}
+  const chatbotToggler = document.querySelector(".chatbot-toggler");
+  const chatbotWindow = document.querySelector(".chatbot-window");
+  const closeBtn = document.querySelector(".close-btn");
+  const chatbotBody = document.querySelector(".chatbot-body");
+  const chatbotInput = chatbotWindow.querySelector("input");
+  const chatbotSendBtn = chatbotWindow.querySelector("button");
 
-function showResult(data) {
-  resultBox.innerHTML = `
-    <h3>Results for ${data.location}</h3>
-    <p><strong>Annual Rainfall:</strong> ${data.annualRainfall} mm</p>
-    <p><strong>Roof Area:</strong> ${data.roofArea} m²</p>
-    <p><strong>Estimated Harvestable Water:</strong> ${data.harvestableWater} litres/year</p>
-    <p><strong>Recommendation:</strong> ${data.recommendation}</p>
-  `;
-  resultBox.style.display = "block";
-}
+  const hiddenElements = document.querySelectorAll(".hidden");
 
-// -----------------------------
-// Fetch Locations (for autocomplete)
-// -----------------------------
-async function loadLocations() {
-  try {
-    const res = await fetch("data/locations_data.json");
-    locationsCache = await res.json();
-  } catch (err) {
-    console.warn("Could not load locations for autocomplete");
-  }
-}
+  // --------------------------------------------------
+  // FORM SUBMISSION
+  // --------------------------------------------------
+  harvestForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-function updateAutocomplete(query) {
-  autocompleteBox.innerHTML = "";
-  if (!query) return;
+    const location = document.getElementById("location").value.trim();
+    const roofArea = Number(document.getElementById("roof-area").value);
+    const dwellers = Number(document.getElementById("dwellers").value);
 
-  const matches = locationsCache
-    .filter((l) => l.city.toLowerCase().startsWith(query.toLowerCase()))
-    .slice(0, 5);
-
-  matches.forEach((match) => {
-    const item = document.createElement("div");
-    item.textContent = match.city;
-    item.className = "autocomplete-item";
-    item.onclick = () => {
-      locationInput.value = match.city;
-      autocompleteBox.innerHTML = "";
-    };
-    autocompleteBox.appendChild(item);
-  });
-}
-
-// -----------------------------
-// Form Submission
-// -----------------------------
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  clearError();
-
-  const location = locationInput.value.trim();
-  const roofArea = Number(roofAreaInput.value);
-  const dwellers = Number(dwellersInput.value);
-
-  if (!location || roofArea <= 0 || dwellers <= 0) {
-    showError("Please enter valid inputs for all fields.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/calculate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ location, roofArea, dwellers }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      showError(data.error || "Calculation failed");
+    if (!location || roofArea <= 0 || dwellers <= 0) {
+      alert("Please enter valid values.");
       return;
     }
 
-    showResult(data);
-  } catch (err) {
-    showError("Could not connect to the server.");
+    const submitButton = harvestForm.querySelector(".cta-button");
+    submitButton.querySelector("span").textContent = "Analyzing...";
+    submitButton.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/calculate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ location, roofArea, dwellers })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Calculation failed");
+      }
+
+      const raw = await response.json();
+
+      // --------------------------------------------------
+      // FRONTEND ADAPTER (RAW → UI DATA)
+      // --------------------------------------------------
+      const water = Number(raw.harvestableWater);
+      const annualDemand = dwellers * 135 * 365;
+
+      // Feasibility
+      let feasibility;
+      if (water < 30000) feasibility = "Low";
+      else if (water < 70000) feasibility = "Medium";
+      else feasibility = "High";
+
+      // % demand met
+      const percentDemandMet = Math.min(
+        100,
+        Math.round((water / annualDemand) * 100)
+      );
+
+      // Recommended system (dynamic)
+      let recommendedStructure;
+      if (water < 20000) {
+        recommendedStructure = {
+          name: "Basic Recharge Pit",
+          icon: "fas fa-tint",
+          description:
+            "Suitable for small rooftops with low rainfall. Low-cost groundwater recharge solution."
+        };
+      } else if (water < 60000) {
+        recommendedStructure = {
+          name: "Recharge Pit + Filter Unit",
+          icon: "fas fa-filter",
+          description:
+            "Recommended for moderate rainfall areas to improve recharge efficiency."
+        };
+      } else {
+        recommendedStructure = {
+          name: "Recharge Pit + Storage Tank",
+          icon: "fas fa-tools",
+          description:
+            "Best for large rooftops and high rainfall regions with significant reuse potential."
+        };
+      }
+
+      // Subsidy logic (dynamic)
+      let subsidyInfo;
+      if (water < 20000) {
+        subsidyInfo =
+          "No direct subsidy available for small-scale rainwater harvesting systems.";
+      } else if (water < 60000) {
+        subsidyInfo =
+          "Eligible for municipal incentive schemes (₹10,000–₹25,000 range, subject to local policy).";
+      } else {
+        subsidyInfo =
+          "Eligible for high-capacity rainwater harvesting subsidy (up to ₹50,000, subject to approval).";
+      }
+
+      const adaptedResults = {
+        water,
+        feasibility,
+        percentDemandMet,
+        annualDemand,
+        recommendedStructure,
+        subsidyInfo
+      };
+
+      updateDashboard(adaptedResults);
+
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      submitButton.querySelector("span").textContent = "Calculate Now";
+      submitButton.disabled = false;
+    }
+  });
+
+  // --------------------------------------------------
+  // DASHBOARD UPDATE
+  // --------------------------------------------------
+  function updateDashboard(results) {
+
+    // Feasibility text
+    feasibilityText.textContent = results.feasibility;
+
+    // Gauge animation
+    const gauge = document.querySelector(".feasibility-gauge");
+    gauge.classList.remove("low", "medium", "high");
+    gauge.classList.add(results.feasibility.toLowerCase());
+
+    // Annual water recharged
+    animateCounter(litersRechargedText, results.water);
+
+    // Recommended system
+    rtrwhTypeIcon.className = results.recommendedStructure.icon;
+    rtrwhTypeText.textContent = results.recommendedStructure.name;
+    rtrwhTypeDescription.textContent =
+      results.recommendedStructure.description;
+
+    // Subsidy info
+    subsidyInfoText.textContent = results.subsidyInfo;
+
+    // Water savings
+    const demandMetPercent = document.getElementById("demand-met-percent");
+    const demandMetText = document.getElementById("demand-met-text");
+
+    animateCounter(demandMetPercent, results.percentDemandMet, false);
+    demandMetText.innerHTML =
+      `of your annual demand of <strong>${results.annualDemand.toLocaleString(
+        "en-IN"
+      )} L</strong> can be met.`;
+
+    // Reveal dashboard & cards
+    dashboard.classList.add("visible");
+    dashboard.querySelectorAll(".hidden").forEach((el) => {
+      el.classList.add("visible");
+    });
+
+    dashboardContext = results;
   }
-});
 
-// -----------------------------
-// Event Listeners
-// -----------------------------
-locationInput.addEventListener("input", (e) => {
-  updateAutocomplete(e.target.value);
-});
+  // --------------------------------------------------
+  // COUNTER ANIMATION
+  // --------------------------------------------------
+  function animateCounter(element, target, addLiters = true) {
+    let current = 0;
+    const step = target / 75;
 
-// -----------------------------
-// Init
-// -----------------------------
-loadLocations();
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) {
+        element.textContent = target.toLocaleString("en-IN");
+        if (addLiters) element.textContent += " L";
+        clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(current).toLocaleString("en-IN");
+      }
+    }, 20);
+  }
+
+  // --------------------------------------------------
+  // CHATBOT
+  // --------------------------------------------------
+  const handleChat = async () => {
+    const userMessage = chatbotInput.value.trim();
+    if (!userMessage) return;
+
+    addMessageToChat(userMessage, "user");
+    chatbotInput.value = "";
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMessage,
+          context: dashboardContext
+        })
+      });
+
+      const data = await response.json();
+      addMessageToChat(data.reply, "bot");
+    } catch {
+      addMessageToChat(
+        "Sorry, I’m having trouble connecting right now.",
+        "bot"
+      );
+    }
+  };
+
+  chatbotSendBtn.addEventListener("click", handleChat);
+  chatbotInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") handleChat();
+  });
+
+  function addMessageToChat(message, sender) {
+    const div = document.createElement("div");
+    div.className = `chat-message ${sender}`;
+    const p = document.createElement("p");
+    p.textContent = message;
+    div.appendChild(p);
+    chatbotBody.appendChild(div);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+  }
+
+  // --------------------------------------------------
+  // CHATBOT TOGGLE & INTERSECTION OBSERVER
+  // --------------------------------------------------
+  chatbotToggler.addEventListener("click", () =>
+    chatbotWindow.classList.toggle("active")
+  );
+  closeBtn.addEventListener("click", () =>
+    chatbotWindow.classList.remove("active")
+  );
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.classList.add("visible");
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  hiddenElements.forEach((el) => observer.observe(el));
+});
